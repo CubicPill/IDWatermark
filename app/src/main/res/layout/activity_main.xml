@@ -13,13 +13,13 @@
         android:orientation="vertical">
 
         <Button
-            android:id="@+id/R.id.cameraBtn"
+            android:id="@+id/cameraBtn"
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:text="@string/camera" />
 
         <Button
-            android:id="@+id/R.id.galleryBtn"
+            android:id="@+id/galleryBtn"
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:text="@string/gallery" />
