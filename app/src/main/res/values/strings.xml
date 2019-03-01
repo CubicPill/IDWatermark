@@ -2,4 +2,13 @@
     <string name="app_name">ID Watermark</string>
     <string name="camera">Camera</string>
     <string name="gallery">Gallery</string>
+    <string name="input_wm_text">Text</string>
+    <string name="pick_color">Color</string>
+    <string name="rotation">Rotation</string>
+    <string name="alpha">Alpha</string>
+    <string name="tile_mode">Tile</string>
+    <string name="gray_mode">Gray</string>
+    <string name="default_watermark_text">Watermark</string>
+    <string name="done">Done</string>
+    <string name="reset">Reset</string>
 </resources>

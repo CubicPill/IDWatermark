@@ -12,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity
 import java.io.File
 import androidx.core.content.FileProvider
 import com.theartofdev.edmodo.cropper.CropImage
-import android.R.attr.data
 import com.theartofdev.edmodo.cropper.CropImageView
 
 
@@ -89,7 +88,9 @@ class MainActivity : AppCompatActivity() {
                     val resultUri = result.uri
                     Log.d("IDWatermark", "CropImage result uri: $resultUri")
                     currentPhotoUri = resultUri
-
+                    val addWatermarkIntent=Intent(this, AddWatermarkActivity::class.java)
+                    addWatermarkIntent.putExtra("IMAGE_URI",currentPhotoUri)
+                    startActivity(addWatermarkIntent)
                 }
             }
         }
