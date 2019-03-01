@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="colors">
-
-        <item>@color/colorRed</item>
-        <item>@color/colorPurple</item>
-        <item>@color/colorBlue</item>
-        <item>@color/colorGreen</item>
-
-        <item>@color/colorYellow</item>
-
-        <item>@color/colorBlack</item>
         <item>@color/colorWhite</item>
+        <item>@color/colorBlack</item>
+        <item>@color/colorOrange</item>
+        <item>@color/colorYellow</item>
+        <item>@color/colorGreen</item>
+        <item>@color/colorCyan</item>
+        <item>@color/colorBlue</item>
+        <item>@color/colorPurple</item>
+        <item>@color/colorRed</item>
     </string-array>
 </resources>

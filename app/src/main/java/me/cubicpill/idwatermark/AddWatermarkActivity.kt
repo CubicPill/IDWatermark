@@ -2,33 +2,38 @@ package me.cubicpill.idwatermark
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
-import android.util.Log
-import kotlinx.android.synthetic.main.activity_add_watermark.*
-
 import android.graphics.Color
-import com.watermark.androidwm.WatermarkBuilder
-import com.watermark.androidwm.bean.WatermarkText
+import android.net.Uri
+import android.os.Bundle
+import android.os.Environment
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import com.divyanshu.colorseekbar.ColorSeekBar
-import com.warkiz.widget.OnSeekChangeListener
 import com.warkiz.widget.IndicatorSeekBar
+import com.warkiz.widget.OnSeekChangeListener
 import com.warkiz.widget.SeekParams
+import com.watermark.androidwm.Watermark
+import com.watermark.androidwm.WatermarkBuilder
+import com.watermark.androidwm.bean.WatermarkText
+import kotlinx.android.synthetic.main.activity_add_watermark.*
+import java.io.File
+import java.io.FileOutputStream
 
 
 class AddWatermarkActivity : AppCompatActivity() {
-    var positionX = 0.5
-    var positionY = 0.5
-    var textColor = Color.WHITE
-    var textAlpha = 255
-    var textSize = 20.0
-    var textRotation = 0.0
-    var tileMode = true
-    var grayMode = false
-    lateinit var imageBitmap: Bitmap
+    private var positionX = 0.0
+    private var positionY = 0.0
+    private var textColor = Color.WHITE
+    private var textAlpha = 255
+    private var textSize = 20.0
+    private var textRotation = 0.0
+    private var tileMode = true
+    private var grayMode = false
+    private lateinit var imageBitmap: Bitmap
+    private lateinit var watermarkedImage: Watermark
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_watermark)
@@ -38,7 +43,6 @@ class AddWatermarkActivity : AppCompatActivity() {
         Log.d("IDWatermark", "Get URI: $imageUri")
         imageBitmap = BitmapFactory.decodeFile(imageUri.encodedPath)
 
-        watermarkImageView.setImageURI(imageUri)
         rotationSeekBar.setIndicatorTextFormat("\${PROGRESS}°")
         rotationSeekBar.onSeekChangeListener = object : OnSeekChangeListener {
             override fun onSeeking(p: SeekParams) {
@@ -115,9 +119,32 @@ class AddWatermarkActivity : AppCompatActivity() {
 
         }
 
+        val clickListener = View.OnClickListener { view ->
+
+            when (view.id) {
+                R.id.resetBtn -> reset()
+                R.id.doneBtn -> saveImage()
+            }
+        }
+        doneBtn.setOnClickListener(clickListener)
+        resetBtn.setOnClickListener(clickListener)
+
+        initWatermarkView()
+
     }
 
-    fun drawWatermarkOnImage() {
+    private fun initWatermarkView() {
+        //textColor = colorSeekBar.getColor()
+        textAlpha = alphaSeekBar.progress
+        textRotation = rotationSeekBar.progress.toDouble()
+        textSize = sizeSeekBar.progress.toDouble()
+        tileMode = tileModeSwitch.isChecked
+        grayMode = grayModeSwitch.isChecked
+        drawWatermarkOnImage()
+
+    }
+
+    private fun drawWatermarkOnImage() {
         val watermarkText = WatermarkText(watermarkText.text.toString())
                 .setPositionX(positionX)
                 .setPositionY(positionY)
@@ -128,12 +155,29 @@ class AddWatermarkActivity : AppCompatActivity() {
                 .setRotation(textRotation)
                 .setTextSize(textSize)
 
-        WatermarkBuilder
+        watermarkedImage = WatermarkBuilder
                 .create(this, imageBitmap)
-                .loadWatermarkText(watermarkText) // use .loadWatermarkImage(watermarkImage) to load an image.
+                .loadWatermarkText(watermarkText)
                 .setTileMode(tileMode)
-                .getWatermark()
-                .setToImageView(watermarkImageView)
+                .watermark
+        watermarkedImage.setToImageView(watermarkImageView)
+    }
+
+    private fun reset() {
+        drawWatermarkOnImage()
+    }
+
+    private fun saveImage() {
+        val bitmap = watermarkedImage
+                .outputImage
+        val picPath = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES).absolutePath
+        val image = File(picPath, "watermark.png")
+        Log.d("IDM", "Saving to ${image.absolutePath}")
+        val out = FileOutputStream(image)
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+        out.flush()
+        out.close()
     }
 }
 

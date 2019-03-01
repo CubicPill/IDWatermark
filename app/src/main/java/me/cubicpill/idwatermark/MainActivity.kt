@@ -7,12 +7,12 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
-import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import java.io.File
 import androidx.core.content.FileProvider
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
+import kotlinx.android.synthetic.main.activity_main.*
+import java.io.File
 
 
 class MainActivity : AppCompatActivity() {
@@ -22,8 +22,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val galleryButton = findViewById<Button>(R.id.galleryBtn)
-        val cameraButton = findViewById<Button>(R.id.cameraBtn)
+
         val clickListener = View.OnClickListener { view ->
 
             when (view.id) {
@@ -31,12 +30,12 @@ class MainActivity : AppCompatActivity() {
                 R.id.cameraBtn -> onCameraButtonClick()
             }
         }
-        galleryButton.setOnClickListener(clickListener)
-        cameraButton.setOnClickListener(clickListener)
+        galleryBtn.setOnClickListener(clickListener)
+        cameraBtn.setOnClickListener(clickListener)
 
     }
 
-    fun onCameraButtonClick() {
+    private fun onCameraButtonClick() {
         val cameraPhoto = File.createTempFile("ID_WM", null, this.cacheDir)
         Log.d("IDWatermark", "cameraPhoto uri " + cameraPhoto.toURI().toString())
         val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
@@ -53,7 +52,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun onGalleryButtonClick() {
+    private fun onGalleryButtonClick() {
         val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
         startActivityForResult(galleryIntent, REQUEST_GALLERY)
 

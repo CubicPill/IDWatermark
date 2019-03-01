@@ -9,5 +9,7 @@
     <color name="colorGreen">#00FF00</color>
     <color name="colorRed">#FF0000</color>
     <color name="colorPurple">#FF00FF</color>
-    <color name="colorYellow">#00FFFF</color>
+    <color name="colorCyan">#00FFFF</color>
+    <color name="colorYellow">#FFFF00</color>
+    <color name="colorOrange">#FFA500</color>
 </resources>
