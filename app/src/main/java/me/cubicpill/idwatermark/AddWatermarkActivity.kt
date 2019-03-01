@@ -6,7 +6,6 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.widget.SeekBar
 import kotlinx.android.synthetic.main.activity_add_watermark.*
 
 import android.graphics.Color
@@ -15,6 +14,9 @@ import com.watermark.androidwm.bean.WatermarkText
 import android.text.Editable
 import android.text.TextWatcher
 import com.divyanshu.colorseekbar.ColorSeekBar
+import com.warkiz.widget.OnSeekChangeListener
+import com.warkiz.widget.IndicatorSeekBar
+import com.warkiz.widget.SeekParams
 
 
 class AddWatermarkActivity : AppCompatActivity() {
@@ -37,38 +39,47 @@ class AddWatermarkActivity : AppCompatActivity() {
         imageBitmap = BitmapFactory.decodeFile(imageUri.encodedPath)
 
         watermarkImageView.setImageURI(imageUri)
-        rotationSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-
-            override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
-                // Display the current progress of SeekBar
-                textRotation = (i - 50) * 9.0 / 5.0
+        rotationSeekBar.setIndicatorTextFormat("\${PROGRESS}°")
+        rotationSeekBar.onSeekChangeListener = object : OnSeekChangeListener {
+            override fun onSeeking(p: SeekParams) {
+                textRotation = p.progressFloat.toDouble()
                 drawWatermarkOnImage()
             }
 
-            override fun onStartTrackingTouch(seekBar: SeekBar) {
+            override fun onStartTrackingTouch(seekBar: IndicatorSeekBar) {}
+
+            override fun onStopTrackingTouch(seekBar: IndicatorSeekBar) {
 
             }
+        }
 
-            override fun onStopTrackingTouch(seekBar: SeekBar) {
 
-            }
-        })
-        alphaSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        alphaSeekBar.onSeekChangeListener = object : OnSeekChangeListener {
 
-            override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
-                // Display the current progress of SeekBar
-                textAlpha = (i * 2.25).toInt()
+            override fun onSeeking(p: SeekParams) {
+                textAlpha = p.progress
                 drawWatermarkOnImage()
             }
 
-            override fun onStartTrackingTouch(seekBar: SeekBar) {
+            override fun onStartTrackingTouch(seekBar: IndicatorSeekBar) {}
+
+            override fun onStopTrackingTouch(seekBar: IndicatorSeekBar) {
 
             }
+        }
+        sizeSeekBar.onSeekChangeListener = object : OnSeekChangeListener {
 
-            override fun onStopTrackingTouch(seekBar: SeekBar) {
+            override fun onSeeking(p: SeekParams) {
+                textSize = p.progress.toDouble()
+                drawWatermarkOnImage()
+            }
+
+            override fun onStartTrackingTouch(seekBar: IndicatorSeekBar) {}
+
+            override fun onStopTrackingTouch(seekBar: IndicatorSeekBar) {
 
             }
-        })
+        }
         watermarkText.addTextChangedListener(object : TextWatcher {
 
             override fun afterTextChanged(s: Editable) {
@@ -81,6 +92,7 @@ class AddWatermarkActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
             }
         })
+
         colorSeekBar.setOnColorChangeListener(object : ColorSeekBar.OnColorChangeListener {
             override fun onColorChangeListener(color: Int) {
                 textColor = color
@@ -91,14 +103,16 @@ class AddWatermarkActivity : AppCompatActivity() {
         tileModeSwitch.setOnCheckedChangeListener { _, isChecked ->
             run {
                 tileMode = isChecked
+                drawWatermarkOnImage()
             }
-            drawWatermarkOnImage()
+
         }
         grayModeSwitch.setOnCheckedChangeListener { _, isChecked ->
             run {
                 grayMode = isChecked
+                drawWatermarkOnImage()
             }
-            drawWatermarkOnImage()
+
         }
 
     }

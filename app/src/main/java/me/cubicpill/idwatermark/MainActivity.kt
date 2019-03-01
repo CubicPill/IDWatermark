@@ -88,8 +88,8 @@ class MainActivity : AppCompatActivity() {
                     val resultUri = result.uri
                     Log.d("IDWatermark", "CropImage result uri: $resultUri")
                     currentPhotoUri = resultUri
-                    val addWatermarkIntent=Intent(this, AddWatermarkActivity::class.java)
-                    addWatermarkIntent.putExtra("IMAGE_URI",currentPhotoUri)
+                    val addWatermarkIntent = Intent(this, AddWatermarkActivity::class.java)
+                    addWatermarkIntent.putExtra("IMAGE_URI", currentPhotoUri)
                     startActivity(addWatermarkIntent)
                 }
             }

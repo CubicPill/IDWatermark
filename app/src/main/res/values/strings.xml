@@ -11,4 +11,5 @@
     <string name="default_watermark_text">Watermark</string>
     <string name="done">Done</string>
     <string name="reset">Reset</string>
+    <string name="size">Size</string>
 </resources>
