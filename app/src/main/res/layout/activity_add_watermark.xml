@@ -17,7 +17,6 @@
             android:id="@+id/watermarkImageView"
             android:layout_width="match_parent"
             android:layout_height="300dp"
-            android:scaleType="fitCenter"
             app:srcCompat="@android:color/darker_gray"
             tools:layout_editor_absoluteX="1dp"
             tools:layout_editor_absoluteY="45dp" />

@@ -5,13 +5,15 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.Log
+
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
 import kotlinx.android.synthetic.main.activity_main.*
+import timber.log.Timber
+
 import java.io.File
 
 
@@ -19,10 +21,13 @@ class MainActivity : AppCompatActivity() {
     private val REQUEST_CAMERA = 1
     private val REQUEST_GALLERY = 2
     private var currentPhotoUri: Uri? = null
+    private var cameraPhotoUri: Uri? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+        }
         val clickListener = View.OnClickListener { view ->
 
             when (view.id) {
@@ -36,8 +41,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onCameraButtonClick() {
-        val cameraPhoto = File.createTempFile("ID_WM", null, this.cacheDir)
-        Log.d("IDWatermark", "cameraPhoto uri " + cameraPhoto.toURI().toString())
+        val cameraPhoto = File.createTempFile("ID_WM_CAM", null, this.cacheDir)
+        cameraPhotoUri = cameraPhoto.toURI() as Uri?
+        Timber.d("cameraPhoto uri %s", cameraPhoto.toURI().toString())
         val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
 
         val photoUri = FileProvider.getUriForFile(
@@ -59,14 +65,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        Log.d("IDWatermark", "onActivityResult")
+        Timber.d("onActivityResult")
         super.onActivityResult(requestCode, resultCode, data)
 
         if (resultCode == Activity.RESULT_OK) {
-            Log.d("IDWatermark", "Result: OK!")
+            Timber.d("Result: OK!")
             when (requestCode) {
                 REQUEST_CAMERA -> {
-                    Log.d("IDWatermark", "URI from camera: " + currentPhotoUri.toString())
+                    Timber.d("URI from camera: %s", currentPhotoUri.toString())
                     CropImage.activity(currentPhotoUri)
                             .setInitialCropWindowPaddingRatio(0f)
                             .setGuidelines(CropImageView.Guidelines.OFF)
@@ -75,7 +81,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 REQUEST_GALLERY -> {
 
-                    Log.d("IDWatermark", "URI from gallery " + data?.data.toString())
+                    Timber.d("URI from gallery %s", data?.data.toString())
                     currentPhotoUri = data?.data
                     CropImage.activity(currentPhotoUri)
                             .setInitialCropWindowPaddingRatio(0f)
@@ -85,7 +91,7 @@ class MainActivity : AppCompatActivity() {
                 CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE -> {
                     val result = CropImage.getActivityResult(data)
                     val resultUri = result.uri
-                    Log.d("IDWatermark", "CropImage result uri: $resultUri")
+                    Timber.d("CropImage result uri: $resultUri")
                     currentPhotoUri = resultUri
                     val addWatermarkIntent = Intent(this, AddWatermarkActivity::class.java)
                     addWatermarkIntent.putExtra("IMAGE_URI", currentPhotoUri)
@@ -94,6 +100,16 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    private fun clearAllCache() {
+        cacheDir.deleteRecursively()
+    }
+
+
+    override fun onDestroy() {
+        super.onDestroy()
+        clearAllCache()
     }
 
 }
