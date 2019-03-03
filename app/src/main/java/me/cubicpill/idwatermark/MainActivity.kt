@@ -21,7 +21,6 @@ class MainActivity : AppCompatActivity() {
     private val REQUEST_CAMERA = 1
     private val REQUEST_GALLERY = 2
     private var currentPhotoUri: Uri? = null
-    private var cameraPhotoUri: Uri? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -42,7 +41,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun onCameraButtonClick() {
         val cameraPhoto = File.createTempFile("ID_WM_CAM", null, this.cacheDir)
-        cameraPhotoUri = cameraPhoto.toURI() as Uri?
         Timber.d("cameraPhoto uri %s", cameraPhoto.toURI().toString())
         val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
 

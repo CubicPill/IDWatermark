@@ -1,5 +1,6 @@
 package me.cubicpill.idwatermark
 
+import android.Manifest
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
@@ -8,9 +9,10 @@ import android.os.Bundle
 import android.os.Environment
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import com.divyanshu.colorseekbar.ColorSeekBar
 import com.warkiz.widget.IndicatorSeekBar
 import com.warkiz.widget.OnSeekChangeListener
@@ -19,8 +21,11 @@ import com.watermark.androidwm.Watermark
 import com.watermark.androidwm.WatermarkBuilder
 import com.watermark.androidwm.bean.WatermarkText
 import kotlinx.android.synthetic.main.activity_add_watermark.*
+import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 class AddWatermarkActivity : AppCompatActivity() {
@@ -40,8 +45,9 @@ class AddWatermarkActivity : AppCompatActivity() {
 
         val bundle = intent.extras
         val imageUri: Uri = bundle!!.get("IMAGE_URI") as Uri
-        Log.d("IDWatermark", "Get URI: $imageUri")
+        Timber.d("Get URI: $imageUri")
         imageBitmap = BitmapFactory.decodeFile(imageUri.encodedPath)
+        Timber.d("Image size: ${imageBitmap.width}*${imageBitmap.height}")
 
         rotationSeekBar.setIndicatorTextFormat("\${PROGRESS}°")
         rotationSeekBar.onSeekChangeListener = object : OnSeekChangeListener {
@@ -156,11 +162,13 @@ class AddWatermarkActivity : AppCompatActivity() {
                 .setTextSize(textSize)
 
         watermarkedImage = WatermarkBuilder
-                .create(this, imageBitmap)
+                .create(this, imageBitmap, false)
                 .loadWatermarkText(watermarkText)
                 .setTileMode(tileMode)
                 .watermark
         watermarkedImage.setToImageView(watermarkImageView)
+        Timber.d("Watermarked image size: ${watermarkedImage.outputImage.width}*${watermarkedImage.outputImage.height}")
+
     }
 
     private fun reset() {
@@ -168,16 +176,38 @@ class AddWatermarkActivity : AppCompatActivity() {
     }
 
     private fun saveImage() {
+        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
         val bitmap = watermarkedImage
                 .outputImage
-        val picPath = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES).absolutePath
-        val image = File(picPath, "watermark.png")
-        Log.d("IDM", "Saving to ${image.absolutePath}")
-        val out = FileOutputStream(image)
+        val picFolderPath = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES).absolutePath + File.separator + "IDWatermark/"
+        val picFolder = File(picFolderPath)
+        if (!picFolder.exists()) {
+            picFolder.mkdir()
+        }
+        Timber.d("Output path: ${picFolder.absolutePath}")
+
+
+        val timeString = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+        val imageFile = File(picFolder.absolutePath, "IDWatermark_$timeString.png")
+        Timber.d("Saving to ${imageFile.absolutePath}")
+
+        if (!imageFile.exists()) {
+            imageFile.createNewFile()
+        }
+        val out = FileOutputStream(imageFile)
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
         out.flush()
         out.close()
+        Toast.makeText(this, "${getString(R.string.saved_to)}: ${imageFile.absolutePath}", Toast.LENGTH_SHORT).show()
     }
+
+
+    override fun onDestroy() {
+        super.onDestroy()
+        cacheDir.deleteRecursively()
+    }
+
+
 }
 
