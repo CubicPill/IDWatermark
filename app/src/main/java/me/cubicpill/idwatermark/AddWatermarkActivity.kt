@@ -27,7 +27,6 @@ import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
-
 class AddWatermarkActivity : AppCompatActivity() {
     private var positionX = 0.0
     private var positionY = 0.0
@@ -48,7 +47,7 @@ class AddWatermarkActivity : AppCompatActivity() {
         Timber.d("Get URI: $imageUri")
         imageBitmap = BitmapFactory.decodeFile(imageUri.encodedPath)
         Timber.d("Image size: ${imageBitmap.width}*${imageBitmap.height}")
-
+        initWidgets()
         rotationSeekBar.setIndicatorTextFormat("\${PROGRESS}°")
         rotationSeekBar.onSeekChangeListener = object : OnSeekChangeListener {
             override fun onSeeking(p: SeekParams) {
@@ -139,6 +138,15 @@ class AddWatermarkActivity : AppCompatActivity() {
 
     }
 
+    private fun initWidgets() {
+        watermarkText.setText(R.string.input_wm_text)
+        alphaSeekBar.setProgress(Constants.WM_DEFAULT_ALPHA)
+        rotationSeekBar.setProgress(Constants.WM_DEFAULT_ROTATION)
+        sizeSeekBar.setProgress(Constants.WM_DEFAULT_SIZE)
+        tileModeSwitch.isChecked = Constants.WM_DEFAULT_TILE_MODE
+        grayModeSwitch.isChecked = Constants.WM_DEFAULT_GRAY_MODE
+    }
+
     private fun initWatermarkView() {
         //textColor = colorSeekBar.getColor()
         textAlpha = alphaSeekBar.progress
@@ -177,35 +185,45 @@ class AddWatermarkActivity : AppCompatActivity() {
 
     private fun saveImage() {
         ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
-        val bitmap = watermarkedImage
-                .outputImage
-        val picFolderPath = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES).absolutePath + File.separator + "IDWatermark/"
-        val picFolder = File(picFolderPath)
-        if (!picFolder.exists()) {
-            picFolder.mkdir()
-        }
-        Timber.d("Output path: ${picFolder.absolutePath}")
+        Toast.makeText(this, R.string.saving, Toast.LENGTH_SHORT).show()
+
+        Thread {
+            val bitmap = watermarkedImage
+                    .outputImage
+            val picFolderPath = Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_PICTURES).absolutePath + File.separator + "IDWatermark/"
+            val picFolder = File(picFolderPath)
+            if (!picFolder.exists()) {
+                picFolder.mkdir()
+            }
+            Timber.d("Output path: ${picFolder.absolutePath}")
 
 
-        val timeString = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-        val imageFile = File(picFolder.absolutePath, "IDWatermark_$timeString.png")
-        Timber.d("Saving to ${imageFile.absolutePath}")
+            val timeString = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+            val imageFile = File(picFolder.absolutePath, "IDWatermark_$timeString.jpg")
+            Timber.d("Saving to ${imageFile.absolutePath}")
 
-        if (!imageFile.exists()) {
-            imageFile.createNewFile()
-        }
-        val out = FileOutputStream(imageFile)
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
-        out.flush()
-        out.close()
-        Toast.makeText(this, "${getString(R.string.saved_to)}: ${imageFile.absolutePath}", Toast.LENGTH_SHORT).show()
+            if (!imageFile.exists()) {
+                imageFile.createNewFile()
+            }
+            val out = FileOutputStream(imageFile)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
+            out.flush()
+            out.close()
+            runOnUiThread {
+                Toast.makeText(this, "${getString(R.string.saved_to)}: ${imageFile.absolutePath}", Toast.LENGTH_SHORT).show()
+            }
+        }.start()
+
     }
 
 
     override fun onDestroy() {
         super.onDestroy()
+        Timber.d("Activity destroyed, clearing")
         cacheDir.deleteRecursively()
+        imageBitmap.recycle()
+        watermarkedImage.recycle()
     }
 
 
